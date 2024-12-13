@@ -2,20 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Poppins", sans-serif;
+  /* @apply bg-black text-white; */
+}
+
+/* input element styling */
+
+.signup-input {
+  @apply w-full pt-2 bg-gray-600 rounded-md border border-gray-700 focus:outline-none focus:border-gray-500 ;
+}
+
+/* buttton styling */
+.signup-btn {
+  @apply w-full bg-green-500 hover:bg-green-400 text-black font-semibold p-3 rounded-md;
+}
+
+/* label styling */
+.signup-heading{
+  @apply  text-sm font-medium mb-1 text-white;
+}
+/* Hide the number input spinner in webkit-based browsers (Chrome, Safari) */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Hide the number input spinner in Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
 }
