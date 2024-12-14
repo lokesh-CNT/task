@@ -4,13 +4,14 @@
 
 body {
   font-family: "Poppins", sans-serif;
-  /* @apply bg-black text-white; */
+ 
+  @apply bg-black text-white;
 }
 
 /* input element styling */
 
 .signup-input {
-  @apply w-full pt-2 bg-gray-600 rounded-md border border-gray-700 focus:outline-none focus:border-gray-500 ;
+  @apply w-full p-2 bg-gray-600 rounded-md border border-gray-700 focus:outline-none focus:border-gray-500 ;
 }
 
 /* buttton styling */
