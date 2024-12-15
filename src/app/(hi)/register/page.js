@@ -1,12 +1,16 @@
 'use client';
 
+import AutoImageSlider from '@/app/components/ImageSlider';
+import TextField from '@/app/components/TextFeild';
 import React, { useState } from 'react';
+
 
 const Page = () => {
   // State declarations
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    countryCode:'10',
     mobile: '',
     password: '',
     rePassword: '',
@@ -61,24 +65,33 @@ const Page = () => {
   };
 
   // Validations
+
+  // username validation it allows only alphabets
   const validateName = () => {
     const { name } = formData;
     const nameRegex = /^[a-zA-Z\s]*$/;
     if (!name) {
       setErrors((prev) => ({ ...prev, nameError: 'Name is required' }));
-    } else if (!nameRegex.test(name)) {
+    }else if (name.length<3 || name.length>20){
+       setErrors((prev) => ({ ...prev, nameError: 'Name should be between 3-20 character only' })) 
+    } 
+    else if (!nameRegex.test(name)) {
       setErrors((prev) => ({
         ...prev,
         nameError: 'Name should only contain letters and spaces',
       }));
     } else {
       setErrors((prev) => ({ ...prev, nameError: '' }));
+      
     }
   };
 
+
+  // Email validation it allows only a alphanumberic and some special charater
   const validateEmail = () => {
     const { email } = formData;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[a-zA-Z0-9][^\s@]*@[^\s@]+\.[^\s@]+[a-zA-Z0-9]$/;
+  
     if (!email) {
       setErrors((prev) => ({ ...prev, emailError: 'Email is required' }));
     } else if (!emailRegex.test(email)) {
@@ -87,20 +100,26 @@ const Page = () => {
       setErrors((prev) => ({ ...prev, emailError: '' }));
     }
   };
+  
 
-  const validateMobile = () => {
-    const { mobile } = formData;
-    if (!mobile) {
-      setErrors((prev) => ({ ...prev, mobileError: 'Mobile number is required' }));
-    } else if (!/^\d{10}$/.test(mobile)) {
-      setErrors((prev) => ({
-        ...prev,
-        mobileError: 'Mobile number must be exactly 10 digits',
-      }));
-    } else {
-      setErrors((prev) => ({ ...prev, mobileError: '' }));
-    }
-  };
+// this methods is for validate a mobile number based on the country code
+
+const validateMobile = () => {
+  const { mobile, countryCode } = formData;
+
+  if (!mobile) {
+    setErrors((prev) => ({ ...prev, mobileError: 'Mobile number is required' }));
+  } else if (!new RegExp(`^\\d{${countryCode}}$`).test(mobile)) {
+    setErrors((prev) => ({
+      ...prev,
+      mobileError: `Mobile number must be exactly ${countryCode} digits`,
+    }));
+  } else {
+    setErrors((prev) => ({ ...prev, mobileError: '' }));
+  }
+};
+
+// this method is for validate a password
 
   const validatePassword = () => {
     const { password } = formData;
@@ -120,9 +139,10 @@ const Page = () => {
     }
   };
 
+  // this method is compare the both password 
   const validateRePassword = () => {
     const { password, rePassword } = formData;
-    if (!rePassword) {
+    if (!rePassword) { 
       setErrors((prev) => ({ ...prev, rePasswordError: 'Please confirm your password' }));
     } else if (password !== rePassword) {
       setErrors((prev) => ({ ...prev, rePasswordError: 'Passwords do not match' }));
@@ -130,6 +150,8 @@ const Page = () => {
       setErrors((prev) => ({ ...prev, rePasswordError: '' }));
     }
   };
+
+  // this method is check the dropdown radio checkbox all are selected or not
 
   const validateDropdowns = () => {
     const { gender, work, framework } = formData;
@@ -142,7 +164,7 @@ const Page = () => {
   };
 
 
-  
+  // this method is for validate a form to check all feilds are completed 
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -153,8 +175,7 @@ const Page = () => {
     validatePassword();
     validateRePassword();
     validateDropdowns();
-    validateWork();
-    validateFramework();
+   
 
     // Check for any errors
     if (
@@ -176,67 +197,81 @@ const Page = () => {
 
   return (
     <div className="flex justify-center items-center min-h-screen">
+      <div> <AutoImageSlider/> </div>
       <div className="max-w-lg w-full p-5 border border-gray-300 rounded-md bg-gray-800 shadow-md">
         <h2 className="text-2xl font-semibold mb-4 text-center">Registration Form</h2>
         <form onSubmit={handleSubmit}>
           {/* Name */}
           <div className="mb-4">
-            <label>Name</label>
-            <input
-              className="signup-input"
-              type="text"
-              name="name"
-              placeholder="Enter your name"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  name: e.target.value.replace(/[^a-zA-Z\s]/g, ''),
-                }))
-              }
-              onBlur={handleBlur}
+            <TextField
+            label="Name" 
+            id="name"
+            name="name"
+            value={formData.name} 
+            onChange={(e) =>  setFormData((prev) => ({
+              ...prev,
+              name: e.target.value.replace(/[^a-zA-Z\s]/g, '').trim(),
+              // this will allow only alphabetic
+            }))
+            }
+            onBlur={handleBlur}
             />
             {errors.nameError && <p className="text-red-600 text-sm">{errors.nameError}</p>}
           </div>
 
           {/* Email */}
           <div className="mb-4">
-            <label>Email</label>
-            <input
-              className="signup-input"
-              type="email"
+            <TextField
+              label="Email" 
+              id="email"
               name="email"
-              placeholder="Enter your email"
-              value={formData.email}
+              value={formData.email} 
               onChange={(e) =>
                 setFormData((prev) => ({
                   ...prev,
-                  email: e.target.value.replace(/[^0-9a-z._%+-@]/gi, '').toLowerCase(),
+                  email: e.target.value.replace(/[^a-zA-Z0-9._@\-]/gi, '').toLowerCase().trim()                  
+                  // we can able to type only a alpabets and mentioned specail char and number
                 }))
               }
               onBlur={handleBlur}
-            />
+              />
             {errors.emailError && <p className="text-red-600 text-sm">{errors.emailError}</p>}
           </div>
 
           {/* Mobile */}
-          <div className="mb-4">
-            <label>Mobile Number</label>
-            <input
-              className="signup-input"
-              type="text"
-              name="mobile"
-              placeholder="Enter your mobile number"
-              value={formData.mobile}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  mobile: e.target.value.replace(/[^0-9]/g, ''),
-                }))
-              }
-              onBlur={handleBlur}
-              maxLength={10}
-            />
+          <div className="mb-4 ">
+            <label className=''>Mobile Number</label>
+            <div className='flex  '>
+              <div className=''>
+                <select
+                  name="countryCode"
+                  value={formData.countryCode}
+                  onChange={handleChange}
+                  className="px-4 py-[14.2px] mr-3 text-base text-white  bg-gray-800 border-2 rounded-md border-gray-500 focus:outline-none focus:border-gray-400  ">
+                    <option value={10}>+91</option>
+                    <option value={12}>+633</option>
+                    <option value={9}>+89</option>
+                </select>
+              </div>
+              <div className='w-full'>
+                <input
+                  className=" signup-input"
+                  type="text"
+                  name="mobile"
+                  placeholder="Enter your mobile number"
+                  value={formData.mobile}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      mobile: e.target.value.replace(/[^0-9]/g, '').trim(),
+                      // we can able to type only a number 
+                    }))
+                  }
+                  onBlur={handleBlur}
+                  maxLength={formData.countryCode}
+                />
+              </div>
+            </div>
             {errors.mobileError && <p className="text-red-600 text-sm">{errors.mobileError}</p>}
           </div>
 
@@ -324,7 +359,7 @@ const Page = () => {
 
           {/* Framework (Dropdown) */}
           <div className="mb-4">
-            <label>Preferred Framework</label>
+            
             <select
               name="framework"
               value={formData.framework}
@@ -343,14 +378,18 @@ const Page = () => {
 
           {/* Password */}
           <div className="mb-4">
-            <label>Password</label>
-            <input
-              className="signup-input"
-              type="password"
+            <TextField
+              label="Password"
+              id="password"
               name="password"
-              placeholder="Enter your password"
               value={formData.password}
-              onChange={handleChange}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  password: e.target.value.replace(/[^a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/gi, '').trim()
+                  // Allows letters, numbers, and common special characters
+                }))
+              }
               onBlur={handleBlur}
             />
             {errors.passwordError && <p className="text-red-600 text-sm">{errors.passwordError}</p>}
@@ -358,16 +397,21 @@ const Page = () => {
 
           {/* Re-enter Password */}
           <div className="mb-4">
-            <label>Confirm Password</label>
-            <input
-              className="signup-input"
-              type="password"
+            <TextField
+              label="Re-Enter Password"
+              id="repassword"
               name="rePassword"
-              placeholder="Confirm your password"
               value={formData.rePassword}
-              onChange={handleChange}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  rePassword: e.target.value.replace(/[^a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/gi, '').trim()
+                  // Allows letters, numbers, and common special characters
+                }))
+              }
               onBlur={handleBlur}
             />
+            
             {errors.rePasswordError && <p className="text-red-600 text-sm">{errors.rePasswordError}</p>}
           </div>
 
