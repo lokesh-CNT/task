@@ -26,7 +26,7 @@ const TextField = ({ label, id, name, value, onChange, onBlur }) => {
         onChange={onChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
-        className={`peer block w-full px-4 py-3 text-base text-white bg-transparent border-2 rounded-md border-gray-500 focus:outline-none focus:border-gray-400 placeholder-transparent ${
+        className={`peer block w-full px-4 pb-1 pt-5 text-base text-[1rem] text-white bg-transparent border-2 rounded-md border-gray-500    focus:outline-none focus:border-gray-400 placeholder-transparent ${
           (isFocused || value) ? 'border-gray-300' : 'border-gray-400'
         }`}
         placeholder=" " // This allows the label to appear above
@@ -37,7 +37,7 @@ const TextField = ({ label, id, name, value, onChange, onBlur }) => {
         htmlFor={id}
         className={`absolute left-4 transition-all duration-200 transform origin-left ${
           (isFocused || value) 
-            ? 'top-0 text-sm text-blue-500' 
+            ? 'top-0 text-sm text-white' 
             : 'top-1/2 text-base text-gray-500 -translate-y-1/2'
         }`}
       >

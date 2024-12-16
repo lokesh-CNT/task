@@ -1,24 +1,26 @@
 'use client';
 
-import AutoImageSlider from '@/app/components/ImageSlider';
+import Carousel from '@/app/components/ImageSlider';
+import { Loader } from '@/app/components/Loader';
 import TextField from '@/app/components/TextFeild';
+import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
-
 
 const Page = () => {
   // State declarations
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    countryCode:'10',
+    countryCode:'+91',
     mobile: '',
     password: '',
     rePassword: '',
     gender: '',
     work: [],
     framework: '',
+    displayData:false,
   });
-
+  
   const [errors, setErrors] = useState({
     nameError: '',
     emailError: '',
@@ -28,15 +30,23 @@ const Page = () => {
     genderError: '',
     workError: '',
     frameworkError: '',
-    formError: '',
+    
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const routing=useRouter();
+  const countryCodes = {
+    '+91': 10, // India
+    '+1': 10,  // USA
+    '+44': 10, // UK
+    '+81': 10, // Japan
+    '+63': 9,  // Philippines
+  };
+  
   // Handlers for field updates
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-
+   
     if (type === 'checkbox') {
       setFormData((prev) => ({
         ...prev,
@@ -54,13 +64,14 @@ const Page = () => {
 
   const handleBlur = (e) => {
     const { name } = e.target;
+    
     if (name === 'name') validateName();
     if (name === 'email') validateEmail();
     if (name === 'mobile') validateMobile();
     if (name === 'password') validatePassword();
     if (name === 'rePassword') validateRePassword();
-    if (name === 'gender') validateDropdowns();
-    if (name === 'work') validateDropdowns();
+    if (name === 'gender') validateGender();
+    if (name === 'work') validateWork();
     if (name === 'framework') validateDropdowns();
   };
 
@@ -83,6 +94,7 @@ const Page = () => {
     } else {
       setErrors((prev) => ({ ...prev, nameError: '' }));
       
+      
     }
   };
 
@@ -98,6 +110,7 @@ const Page = () => {
       setErrors((prev) => ({ ...prev, emailError: 'Invalid email format' }));
     } else {
       setErrors((prev) => ({ ...prev, emailError: '' }));
+      
     }
   };
   
@@ -106,18 +119,20 @@ const Page = () => {
 
 const validateMobile = () => {
   const { mobile, countryCode } = formData;
+  const expectedLength = countryCodes[countryCode];
 
   if (!mobile) {
     setErrors((prev) => ({ ...prev, mobileError: 'Mobile number is required' }));
-  } else if (!new RegExp(`^\\d{${countryCode}}$`).test(mobile)) {
+  } else if (mobile.length !== expectedLength) {
     setErrors((prev) => ({
       ...prev,
-      mobileError: `Mobile number must be exactly ${countryCode} digits`,
+      mobileError: `Mobile number must be exactly ${expectedLength} digits`,
     }));
   } else {
     setErrors((prev) => ({ ...prev, mobileError: '' }));
   }
 };
+
 
 // this method is for validate a password
 
@@ -136,6 +151,7 @@ const validateMobile = () => {
       }));
     } else {
       setErrors((prev) => ({ ...prev, passwordError: '' }));
+      
     }
   };
 
@@ -148,57 +164,101 @@ const validateMobile = () => {
       setErrors((prev) => ({ ...prev, rePasswordError: 'Passwords do not match' }));
     } else {
       setErrors((prev) => ({ ...prev, rePasswordError: '' }));
+      
     }
   };
 
-  // this method is check the dropdown radio checkbox all are selected or not
+  // this method is check the dropdown is  selected or not
 
   const validateDropdowns = () => {
-    const { gender, work, framework } = formData;
-    setErrors((prev) => ({
-      ...prev,
-      genderError: !gender ? 'Please select a gender' : '',
-      workError: work.length === 0 ? 'Please select at least one work type' : '',
-      frameworkError: !framework ? 'Please choose a framework' : '',
-    }));
+    const {  framework } = formData;
+    if(!framework){
+      setErrors((prev) => ({
+        ...prev,
+        frameworkError:   'Please choose a framework' ,
+      }));
+    }
+    else{
+      setErrors((prev) => ({
+        ...prev,
+        frameworkError:   '' ,
+      }));
+    }
   };
 
+  // this method is validate the gender feild
+  const validateGender = () => {
+    const { gender } = formData;
+    if(!gender){
+      setErrors((prev) => ({
+        ...prev,
+        genderError:   'Please choose a Gender' ,
+      }));
+    }
+    else{
+      setErrors((prev) => ({
+        ...prev,
+        genderError:   '' ,
+      }));
+    }
+  };
+
+  // this method is validate the work feild
+  const validateWork = () => {
+    const{work}=formData;
+    if(work.length<1){
+      setErrors((prev) => ({
+        ...prev,
+        workError: 'Please choose a Work' ,
+      }));
+    }
+    else{
+      setErrors((prev) => ({
+        ...prev,
+        workError:   '' ,
+      }));
+    }
+    
+  };
+
+  
 
   // this method is for validate a form to check all feilds are completed 
 
   const handleSubmit = (e) => {
+    
     e.preventDefault();
-
     validateName();
     validateEmail();
     validateMobile();
     validatePassword();
     validateRePassword();
     validateDropdowns();
-   
+    validateGender();
+    validateWork();
 
     // Check for any errors
     if (
-      !Object.values(errors).some((err) => err !== '') &&
-      Object.values(formData).every((field) => field)
+      !Object.values(errors).some((err) => err !== '') 
     ) {
       setIsSubmitting(true);
       setTimeout(() => {
         console.log('Form Data:', formData);
-        alert('Form submitted successfully!');
+        // routing.push('/successPage');
         setIsSubmitting(false);
+        setFormData(prev=>({...prev,displayData:true}))
+
       }, 1000);
-    } else {
-      setErrors((prev) => ({ ...prev, formError: 'Please fill all fields correctly' }));
-      return;
-    }
-    console.log(formData, errors);
+    } 
+  
   };
 
+  
+
   return (
-    <div className="flex justify-center items-center min-h-screen">
-      <div> <AutoImageSlider/> </div>
-      <div className="max-w-lg w-full p-5 border border-gray-300 rounded-md bg-gray-800 shadow-md">
+    <div className="flex flex-col justify-center items-center   max-w-full min-h-screen lg:flex-row p-3  gap-8 ">
+      <div className='max-w-full md:max-w-lg '> <Carousel/> </div>
+      <div className="max-w-full  w-full  p-5 border border-gray-300 rounded-md bg-gray-800 shadow-md sm:max-w-lg ">
         <h2 className="text-2xl font-semibold mb-4 text-center">Registration Form</h2>
         <form onSubmit={handleSubmit}>
           {/* Name */}
@@ -243,19 +303,27 @@ const validateMobile = () => {
             <label className=''>Mobile Number</label>
             <div className='flex  '>
               <div className=''>
-                <select
+              <select
                   name="countryCode"
                   value={formData.countryCode}
-                  onChange={handleChange}
-                  className="px-4 py-[14.2px] mr-3 text-base text-white  bg-gray-800 border-2 rounded-md border-gray-500 focus:outline-none focus:border-gray-400  ">
-                    <option value={10}>+91</option>
-                    <option value={12}>+633</option>
-                    <option value={9}>+89</option>
-                </select>
+                  onChange={(e) => {
+                    const code = e.target.value;
+                    setFormData((prev) => ({ ...prev, countryCode: code }));
+                  }}
+                  onBlur={handleBlur}
+                  className="px-4 py-[14.2px] mr-3 text-base text-white bg-gray-800 border-2 rounded-md border-gray-500 focus:outline-none focus:border-gray-400"
+                >
+                  {Object.keys(countryCodes).map((code) => (
+                    <option key={code} value={code}>
+                      {code}
+                    </option>
+                  ))}
+              </select>
+
               </div>
               <div className='w-full'>
-                <input
-                  className=" signup-input"
+              <input
+                  className="signup-input"
                   type="text"
                   name="mobile"
                   placeholder="Enter your mobile number"
@@ -264,12 +332,12 @@ const validateMobile = () => {
                     setFormData((prev) => ({
                       ...prev,
                       mobile: e.target.value.replace(/[^0-9]/g, '').trim(),
-                      // we can able to type only a number 
                     }))
                   }
                   onBlur={handleBlur}
-                  maxLength={formData.countryCode}
+                  maxLength={countryCodes[formData.countryCode]}
                 />
+
               </div>
             </div>
             {errors.mobileError && <p className="text-red-600 text-sm">{errors.mobileError}</p>}
@@ -422,12 +490,11 @@ const validateMobile = () => {
               className="w-full p-2 bg-blue-500 text-white rounded"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Submitting...' : 'Submit'}
+              {isSubmitting ?<Loader/>  : 'Submit'}
             </button>
           </div>
 
-          {/* Form Error */}
-          {errors.formError && <p className="text-red-600 text-sm">{errors.formError}</p>}
+          
         </form>
       </div>
     </div>
