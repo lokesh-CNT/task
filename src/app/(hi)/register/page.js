@@ -16,10 +16,11 @@ const Page = () => {
     password: '',
     rePassword: '',
     gender: '',
+    framework:'',
     work: [],
-    framework: '',
-    displayData:false,
   });
+
+  const[displayData,setDisplaydata]=useState();
   
   const [errors, setErrors] = useState({
     nameError: '',
@@ -30,11 +31,12 @@ const Page = () => {
     genderError: '',
     workError: '',
     frameworkError: '',
-    
+    formError:''
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const routing=useRouter();
+
   const countryCodes = {
     '+91': 10, // India
     '+1': 10,  // USA
@@ -239,24 +241,37 @@ const validateMobile = () => {
 
     // Check for any errors
     if (
-      !Object.values(errors).some((err) => err !== '') 
-    ) {
+      !Object.values(errors).some((err) => err !== '') && 
+      Object.values(formData).every((field) => field)) {
       setIsSubmitting(true);
+      setDisplaydata(formData);
+      console.log(displayData);
       setTimeout(() => {
         console.log('Form Data:', formData);
-        // routing.push('/successPage');
+        
         setIsSubmitting(false);
-        setFormData(prev=>({...prev,displayData:true}))
+        setFormData({
+          'name': '',
+          'email': '',
+          'countryCode':'+91',
+          'mobile': '',
+          'password': '',
+          'rePassword': '',
+          'gender': '',
+          'work': [],
+        })
 
       }, 1000);
-    } 
+      
+    }  
   
   };
 
   
 
   return (
-    <div className="flex flex-col justify-center items-center   max-w-full min-h-screen lg:flex-row p-3  gap-8 ">
+    <div>
+      <div className="flex flex-col justify-center items-center   max-w-full min-h-screen lg:flex-row p-3  gap-8 ">
       <div className='max-w-full md:max-w-lg '> <Carousel/> </div>
       <div className="max-w-full  w-full  p-5 border border-gray-300 rounded-md bg-gray-800 shadow-md sm:max-w-lg ">
         <h2 className="text-2xl font-semibold mb-4 text-center">Registration Form</h2>
@@ -435,7 +450,7 @@ const validateMobile = () => {
               onBlur={handleBlur}
               className="signup-input"
             >
-              <option value="">Select a framework</option>
+              <option value="" defaultChecked={true}>Select a framework</option>
               <option value="React">React</option>
               <option value="Angular">Angular</option>
               <option value="Vue">Vue</option>
@@ -497,6 +512,18 @@ const validateMobile = () => {
           
         </form>
       </div>
+      </div>
+      {displayData && (
+        <div className="mt-8 p-5 border rounded-md shadow-md bg-gray-700 "> 
+          <h3 className="text-2xl font-semibold mb-4">Data</h3>
+          <p><strong>Name:</strong> {displayData.name}</p>
+          <p><strong>Email:</strong> {displayData.email}</p>
+          <p><strong>Phone:</strong> {displayData.countryCode} {displayData.mobile}</p>
+          <p><strong>Gender:</strong> {displayData.gender}</p>
+          <p><strong>Work:</strong> {displayData.work.join(', ')}</p>
+          <p><strong>Framework:</strong> {displayData.framework}</p>
+        </div>
+      )}
     </div>
   );
 };

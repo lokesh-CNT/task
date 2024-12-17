@@ -36,3 +36,9 @@ input[type="number"] {
 }
 
 
+.math-equation {
+  display: inline-block;
+  font-family: 'MathQuill';
+  font-size: 1.2em;
+  color: #000;
+}
