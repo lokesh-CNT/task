@@ -1,60 +1,46 @@
-'use client';
+'use client'
 
-import React, { useState, useRef } from 'react';
-import dynamic from 'next/dynamic';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
-import MathQuillBlot from '@/app/components'; // Import custom blot
+import MathEditor from "@/app/components/MathEditor";
+import TextEditor from "@/app/components/TextEditor";
+import React, { useState } from "react";
 
-const MathEditorPopup = dynamic(() => import('@/app/components/MathEditor'), { ssr: false });
 
-const HomePage = () => {
-  const [quillContent, setQuillContent] = useState('');
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const quillRef = useRef(null);
+const App = () => {
+  const [editorContent, setEditorContent] = useState("");
 
-  const openPopup = () => setIsPopupOpen(true);
-  const closePopup = () => setIsPopupOpen(false);
-
-  const handleInsertEquation = (equation) => {
-    const quill = quillRef.current.getEditor();
-    const cursorPosition = quill.getSelection().index;
-
-    // Insert custom math blot
-    quill.insertEmbed(cursorPosition, 'math', equation);
-    quill.setSelection(cursorPosition + 1); // Move cursor
-    closePopup();
+  const handleFormulaInsert = (latex) => {
+    const formulaHTML = `<span class="mathquill-rendered">\\(${latex}\\)</span>`;
+    setEditorContent((prev) => prev + formulaHTML);
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4 relative">
-      <h1 className="text-3xl font-bold mb-6 text-gray-800">ReactQuill with Math Editor</h1>
-
-      {/* ReactQuill Editor */}
-      <ReactQuill
-        ref={quillRef}
-        value={quillContent}
-        onChange={setQuillContent}
-        modules={{ toolbar: [['bold', 'italic', 'underline'], ['math']] }}
-        formats={['bold', 'italic', 'underline', 'math']} // Register custom format
-      />
-
-      {/* Open Popup Button */}
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Math Editor with Text Editor</h1>
       <button
-        onClick={openPopup}
-        className="mt-4 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+        className="bg-green-500 text-white px-4 py-2 rounded mb-4"
+        onClick={() => document.getElementById("math-popup").classList.remove("hidden")}
       >
         Open Math Editor
       </button>
-
-      {/* Math Editor Popup */}
-      {isPopupOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <MathEditorPopup onInsertEquation={handleInsertEquation} onClose={closePopup} />
+      <div id="math-popup" className="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center">
+        <div className="bg-white p-4 rounded-md">
+          <MathEditor onFormulaInsert={handleFormulaInsert} />
+          <button
+            onClick={() => document.getElementById("math-popup").classList.add("hidden")}
+            className="mt-4 bg-red-500 text-white px-4 py-2 rounded"
+          >
+            Close
+          </button>
         </div>
-      )}
+      </div>
+      <TextEditor value={editorContent} onChange={setEditorContent} />
+      <h2 className="text-xl font-semibold mt-6">Editor Output:</h2>
+      <div
+        className="border p-4 mt-2"
+        dangerouslySetInnerHTML={{ __html: editorContent }}
+      ></div>
     </div>
   );
 };
 
-export default HomePage;
+export default App;
