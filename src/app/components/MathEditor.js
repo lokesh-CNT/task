@@ -47,9 +47,7 @@ const MathEditorPopup = ({ onInsertEquation, onClose }) => {
       <div className="flex justify-end gap-3">
         <button
           onClick={() =>
-            onInsertEquation(
-              `<span class="mq-selectable">${mathValue}</span>`
-            )
+            onInsertEquation(mathValue)
           }
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
         >

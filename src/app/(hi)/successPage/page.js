@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import katex from 'katex'; // Import KaTeX for rendering math
-import { EditableMathField, StaticMathField } from 'react-mathquill';
+import 'katex/dist/katex.min.css'; // Import KaTeX styles
 const MathEditorPopup = dynamic(() => import('../../components/MathEditor'), { ssr: false });
 
 const Home = () => {
@@ -13,27 +13,62 @@ const Home = () => {
 
   // Handle inserting a mathematical equation into content
   const handleInsertEquation = (equation) => {
-    const equValue=equation;
-    console.log(equValue)
-    setContent((prevContent) => `${prevContent} ${equation} `);
+    const renderedEquation = katex.renderToString(equation, {
+      throwOnError: false,
+    });
+
+    const span = document.createElement('span');
+    span.className = 'mq-selectable';
+    span.setAttribute('data-latex', equation);
+    span.setAttribute('contenteditable', 'false'); // Make the equation non-editable
+    span.innerHTML = renderedEquation;
+
+    if (contentRef.current) {
+      const selection = window.getSelection();
+      const range = selection.getRangeAt(0);
+
+      range.deleteContents();
+      range.insertNode(span);
+
+      const space = document.createTextNode(' ');
+      range.insertNode(space);
+
+      range.setStartAfter(space);
+      range.setEndAfter(space);
+      selection.removeAllRanges();
+      selection.addRange(range);
+
+      setContent(contentRef.current.innerHTML);
+    }
+
     setMathEditorOpen(false);
+  };
+
+  // Apply formatting (bold or italic) to the selected text
+  const applyFormatting = (command) => {
+    document.execCommand(command, false, null);
+    setContent(contentRef.current.innerHTML); // Update content state
   };
 
   // Handle form submission
   const handleSubmit = () => {
-    console.log('Final Content:', content);
+    const div = document.createElement('div');
+    div.innerHTML = content;
+    const equations = div.querySelectorAll('.mq-selectable');
+    equations.forEach((span) => {
+      const latex = span.getAttribute('data-latex');
+      span.innerHTML = latex;
+    });
+
+    console.log('Final Content:', div.innerHTML);
   };
 
-  // Track changes in the contentEditable field 1
   const handleContentChange = () => {
-    // Ensure to update the content with innerText, not innerHTML
     if (contentRef.current) {
       setContent(contentRef.current.innerHTML);
-      console.log("cont",content)
     }
   };
 
-  // Automatically update the content in the div when the content state changes
   useEffect(() => {
     if (contentRef.current && content !== contentRef.current.innerHTML) {
       contentRef.current.innerHTML = content;
@@ -49,6 +84,18 @@ const Home = () => {
         >
           Open Math Editor
         </button>
+        <button
+          className="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600"
+          onClick={() => applyFormatting('bold')}
+        >
+          Bold
+        </button>
+        <button
+          className="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600"
+          onClick={() => applyFormatting('italic')}
+        >
+          Italic
+        </button>
       </div>
 
       {/* Editable Div */}
@@ -57,9 +104,9 @@ const Home = () => {
         className="border border-gray-300 p-4 bg-white rounded mb-4 text-black w-full"
         contentEditable
         onInput={handleContentChange}
-        style={{ minHeight: '50px', fontSize: '14px', cursor: 'text' }} // Editable div with 50px height
+        style={{ minHeight: '50px', fontSize: '14px', cursor: 'text' }}
       >
-        
+        {/* Initial content */}
       </div>
 
       {/* Submit Button */}
@@ -82,6 +129,3 @@ const Home = () => {
 };
 
 export default Home;
-
-
-
