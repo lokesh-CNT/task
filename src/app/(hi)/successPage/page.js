@@ -23,22 +23,34 @@ const Home = () => {
     span.setAttribute('contenteditable', 'false'); // Make the equation non-editable
     span.innerHTML = renderedEquation;
 
+    // Ensure there's a valid selection before trying to insert the equation
     if (contentRef.current) {
       const selection = window.getSelection();
-      const range = selection.getRangeAt(0);
 
-      range.deleteContents();
-      range.insertNode(span);
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        
+        // If the selection is valid, delete any existing selection and insert the equation
+        range.deleteContents();
+        range.insertNode(span);
 
-      const space = document.createTextNode(' ');
-      range.insertNode(space);
+        const space = document.createTextNode(' ');
+        range.insertNode(space);
 
-      range.setStartAfter(space);
-      range.setEndAfter(space);
-      selection.removeAllRanges();
-      selection.addRange(range);
+        range.setStartAfter(space);
+        range.setEndAfter(space);
+        selection.removeAllRanges();
+        selection.addRange(range);
 
-      setContent(contentRef.current.innerHTML);
+        setContent(contentRef.current.innerHTML);
+      } else {
+        // If no selection exists, insert the equation at the end of the content
+        const contentDiv = contentRef.current;
+        contentDiv.appendChild(span); // Insert equation at the end
+        contentDiv.appendChild(document.createTextNode(' ')); // Add space after equation
+
+        setContent(contentDiv.innerHTML);
+      }
     }
 
     setMathEditorOpen(false);
@@ -46,8 +58,20 @@ const Home = () => {
 
   // Apply formatting (bold or italic) to the selected text
   const applyFormatting = (command) => {
-    document.execCommand(command, false, null);
-    setContent(contentRef.current.innerHTML); // Update content state
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      document.execCommand(command, false, null); // Apply bold/italic to the selected text only
+      setContent(contentRef.current.innerHTML); // Update content state
+    } else {
+      alert('Please select some text to apply formatting.');
+    }
+  };
+
+  // Handle content changes
+  const handleContentChange = () => {
+    if (contentRef.current) {
+      setContent(contentRef.current.innerHTML);
+    }
   };
 
   // Handle form submission
@@ -61,12 +85,6 @@ const Home = () => {
     });
 
     console.log('Final Content:', div.innerHTML);
-  };
-
-  const handleContentChange = () => {
-    if (contentRef.current) {
-      setContent(contentRef.current.innerHTML);
-    }
   };
 
   useEffect(() => {
